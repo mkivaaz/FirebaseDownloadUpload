@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "252951425821",
+    "firebase_url": "https://fir-uploaddowload.firebaseio.com",
+    "project_id": "fir-uploaddowload",
+    "storage_bucket": "fir-uploaddowload.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252951425821:android:82a6361e2c0f642a",
+        "android_client_info": {
+          "package_name": "kivaaz.com.firebaseuploaddowload"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "252951425821-koaca5cg6bqb2klun8llv3iqgfcujdn5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kivaaz.com.firebaseuploaddowload",
+            "certificate_hash": "6890e786f995a9dccbc861acdc9054ead6776b65"
+          }
+        },
+        {
+          "client_id": "252951425821-37ga71mmrjg51lts3u3qp1rbed7iou2j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAGJ15BWuVCj7HlVuCkpqxXIb06d2DrhI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "252951425821-37ga71mmrjg51lts3u3qp1rbed7iou2j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252951425821:android:725509573ce7d0d4",
+        "android_client_info": {
+          "package_name": "kivaaz.com.firebasedownloadupload"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "252951425821-3momc91qilq0cp2bl410b6e5dmmjghrd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kivaaz.com.firebasedownloadupload",
+            "certificate_hash": "6890e786f995a9dccbc861acdc9054ead6776b65"
+          }
+        },
+        {
+          "client_id": "252951425821-37ga71mmrjg51lts3u3qp1rbed7iou2j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAGJ15BWuVCj7HlVuCkpqxXIb06d2DrhI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "252951425821-37ga71mmrjg51lts3u3qp1rbed7iou2j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
