@@ -72,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
                             Toast.makeText(getApplicationContext(),"Image Uploaded", Toast.LENGTH_SHORT).show();
-
-
+                            
                             ImageUpload imgUpload = new ImageUpload(imgName.getText().toString(),taskSnapshot.getStorage().getPath(),getImageExt(ImgURI));
                             String uploadId = mDatabaseR.push().getKey();
                             mDatabaseR.child(uploadId).setValue(imgUpload);
