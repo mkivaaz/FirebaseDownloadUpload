@@ -1,4 +1,4 @@
-package kivaaz.com.firebasedownloadupload;
+package kivaaz.com.firebasedownloadupload.DB;
 
 /**
  * Created by Muguntan on 11/26/2017.
@@ -12,6 +12,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import kivaaz.com.firebasedownloadupload.Adapter.Files;
 
 /**
  * Created by Muguntan on 11/17/2017.

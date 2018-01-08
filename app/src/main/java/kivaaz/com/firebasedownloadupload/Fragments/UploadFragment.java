@@ -1,12 +1,15 @@
-package kivaaz.com.firebasedownloadupload;
+package kivaaz.com.firebasedownloadupload.Fragments;
 
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,9 +25,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
+import kivaaz.com.firebasedownloadupload.ImageUpload;
+import kivaaz.com.firebasedownloadupload.R;
 
-public class MainActivity extends AppCompatActivity {
+import static android.app.Activity.RESULT_OK;
+
+public class UploadFragment extends Fragment {
 
     private static final int REQUEST_CODE = 1234;
     private StorageReference mStorageRef;
@@ -38,18 +44,21 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String FB_STORAGE_PATH = "images/";
     public static final String FB_DATABASE_PATH = "images";
+    String mimeType;
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.upload_fragment, container, false);
+
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mDatabaseR = FirebaseDatabase.getInstance().getReference(FB_DATABASE_PATH);
         mDatabaseR.keepSynced(true);
-        img = (ImageView) findViewById(R.id.iw);
-        imgName = (TextView) findViewById(R.id.imageName);
-        File_Chooser = (Button) findViewById(R.id.btn_File);
-        Upload = (Button) findViewById(R.id.btn_Upload);
-        Download = (Button) findViewById(R.id.btn_Download);
+        img = (ImageView) view.findViewById(R.id.iw);
+        imgName = (TextView) view.findViewById(R.id.imageName);
+        File_Chooser = (Button) view.findViewById(R.id.btn_File);
+        Upload = (Button) view.findViewById(R.id.btn_Upload);
 
 
         File_Chooser.setOnClickListener(new View.OnClickListener() {
@@ -59,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.setType("*/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(intent.createChooser(intent,"Select Image"),REQUEST_CODE);
+                Toast.makeText(getContext(),mimeType, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -71,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            Toast.makeText(getApplicationContext(),"Image Uploaded", Toast.LENGTH_SHORT).show();
-                            
+                            Toast.makeText(getContext(),"Image Uploaded", Toast.LENGTH_SHORT).show();
+
                             ImageUpload imgUpload = new ImageUpload(imgName.getText().toString(),taskSnapshot.getStorage().getPath(),getImageExt(ImgURI));
                             String uploadId = mDatabaseR.push().getKey();
                             mDatabaseR.child(uploadId).setValue(imgUpload);
@@ -83,45 +93,38 @@ public class MainActivity extends AppCompatActivity {
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(getApplicationContext(),e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(),e.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             });
                 }else{
-                    Toast.makeText(getApplicationContext(),"Please Select Image", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"Please Select Image", Toast.LENGTH_SHORT).show();
 
                 }
             }
         });
 
-        Download.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getBaseContext(),Fileviewer.class);
-                startActivity(intent);
-            }
-        });
 
-
+        return view;
     }
 
+
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null ){
             ImgURI = data.getData();
+            imgName.setText(ImgURI.getLastPathSegment().substring(ImgURI.getLastPathSegment().lastIndexOf("/")+1, ImgURI.getLastPathSegment().lastIndexOf(".")));
 
-            File file = new File(ImgURI.toString());
-            imgName.setText(String.valueOf(System.currentTimeMillis()));
+            mimeType = getImageExt(ImgURI);
 
-            String mimeType =getImageExt(ImgURI);
 
-            Toast.makeText(getApplicationContext(),mimeType, Toast.LENGTH_SHORT).show();
-            Glide.with(getBaseContext()).load(ImgURI).into(img);
+            Glide.with(getContext()).load(ImgURI).into(img);
         }
     }
 
     public String getImageExt(Uri uri){
-        ContentResolver contentResolver = getContentResolver();
+        ContentResolver contentResolver = getActivity().getContentResolver();
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
     }

@@ -1,10 +1,14 @@
-package kivaaz.com.firebasedownloadupload;
+package kivaaz.com.firebasedownloadupload.Fragments;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.VideoView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -16,7 +20,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Fileviewer extends AppCompatActivity {
+import kivaaz.com.firebasedownloadupload.Adapter.FileAdapter;
+import kivaaz.com.firebasedownloadupload.Adapter.Files;
+import kivaaz.com.firebasedownloadupload.DB.DatabaseHandler;
+import kivaaz.com.firebasedownloadupload.ImageUpload;
+import kivaaz.com.firebasedownloadupload.R;
+
+public class FileviewerFragment extends Fragment {
 
     FirebaseDatabase database;
     DatabaseReference myRef;
@@ -27,17 +37,16 @@ public class Fileviewer extends AppCompatActivity {
 
     VideoView video;
 
-    public static final String FB_STORAGE_PATH = "images/";
     public static final String FB_DATABASE_PATH = "images";
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fileviewer);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fileviewer_fragment, container, false);
 
-        FileRecycle = findViewById(R.id.file_recycle);
-        video = findViewById(R.id.video_load);
-        final DatabaseHandler db = new DatabaseHandler(this);
+        FileRecycle = view.findViewById(R.id.file_recycle);
+        video = view.findViewById(R.id.video_load);
+        final DatabaseHandler db = new DatabaseHandler(getContext());
         myRef = FirebaseDatabase.getInstance().getReference(FB_DATABASE_PATH);
         myRef.keepSynced(true);
         imgList = new ArrayList<>();
@@ -52,7 +61,7 @@ public class Fileviewer extends AppCompatActivity {
                 }
 
                 // setting callback for Recyclerview
-                adapter = new FileAdapter(imgList, getBaseContext(), new FileAdapter.OnItemClick() {
+                adapter = new FileAdapter(imgList, getContext(), new FileAdapter.OnItemClick() {
                     @Override
                     public void onClick(String value) {
 
@@ -70,9 +79,11 @@ public class Fileviewer extends AppCompatActivity {
             }
         });
 
-
-
+        return view;
     }
+
+
+
 
 
 }
