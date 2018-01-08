@@ -1,4 +1,4 @@
-package kivaaz.com.firebasedownloadupload;
+package kivaaz.com.firebasedownloadupload.Adapter;
 
 /**
  * Created by Muguntan on 11/26/2017.

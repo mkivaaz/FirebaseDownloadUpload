@@ -1,4 +1,4 @@
-package kivaaz.com.firebasedownloadupload;
+package kivaaz.com.firebasedownloadupload.Adapter;
 
 /**
  * Created by Muguntan on 11/26/2017.
@@ -23,6 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import kivaaz.com.firebasedownloadupload.DB.DatabaseHandler;
+import kivaaz.com.firebasedownloadupload.ImageUpload;
+import kivaaz.com.firebasedownloadupload.R;
 
 /**
  * Created by Muguntan on 11/17/2017.
