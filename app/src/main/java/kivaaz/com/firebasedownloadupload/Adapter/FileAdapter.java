@@ -5,16 +5,24 @@ package kivaaz.com.firebasedownloadupload.Adapter;
  */
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -36,15 +44,17 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
     private LayoutInflater inflater;
     List<ImageUpload> data = new ArrayList<>();
     Context context;
-    DatabaseHandler db;
+    String userEmail;
     StorageReference riversRef;
+    DatabaseHandler db;
     private OnItemClick mCallback;
-    private StorageReference mStorageRef;
+    private FirebaseAuth mAuth;
 
-    public FileAdapter(List<ImageUpload> data, Context context, OnItemClick listener) {
+    public FileAdapter(List<ImageUpload> data, Context context,String userEmail, OnItemClick listener) {
         this.data = data;
         this.context = context;
         this.mCallback = listener;
+        this.userEmail = userEmail;
         inflater = LayoutInflater.from(context);
     }
 
@@ -52,6 +62,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
     public FileAdapter.myViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.file_adapter,null);
         myViewHolder holder = new myViewHolder(view);
+        db = new DatabaseHandler(context);
 
         return holder;
     }
@@ -59,29 +70,54 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
     @Override
     public void onBindViewHolder(final FileAdapter.myViewHolder holder, int position) {
         final ImageUpload img = data.get(position);
-        Files file = null;
-        db = new DatabaseHandler(context);
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        riversRef = mStorageRef.child(img.getUrl());
-
-        holder.ImgName.setText(img.getName() + "." + img.getType());
-
-        file = GetFile(img.getName());
-
-        if(file != null){// if file exists load the local uri from DB
-            if(file.getUrl().equalsIgnoreCase(img.getUrl())){// if firebase url & DB url matches
-                final File localFile = new File(file.getLocal_url());
-                if(localFile.exists()){
-                    Glide.with(context).load(file.getLocal_url()).into(holder.Thumb);
-                }else{
-                    UpdateFiles(img,context,holder.Thumb);
+        Files file = GetFile(img.getName());
+        StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+        if(file != null ){
+            holder.ImgName.setText(file.getName() + "." + file.getType());
+            Glide.with(context).load(file.getLocal_url()).listener(new RequestListener<Drawable>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                    holder.progressBar.setVisibility(View.GONE);
+                    return false;
                 }
-            }else{// if firebase url & DB url doesn't match
-                UpdateFiles(img, context, holder.Thumb);
-            }
-        }else{// if file Doesn't exists download the file from uri, stores locally and stores the local uri in DB
-            AddFiles(img, context, holder.Thumb);
+
+                @Override
+                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    holder.progressBar.setVisibility(View.GONE);
+                    return false;
+                }
+            }).into(holder.Thumb);
         }
+        else {
+            holder.ImgName.setText(img.getName() + "." + img.getType());
+            try {
+                riversRef = mStorageRef.child(img.getUrl());
+                final File localFile = File.createTempFile("file", img.getType());
+                riversRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        Glide.with(context).load(localFile.getAbsolutePath()).listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                holder.progressBar.setVisibility(View.GONE);
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                holder.progressBar.setVisibility(View.GONE);
+                                return false;
+                            }
+                        }).into(holder.Thumb);
+                    }
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
 
@@ -95,12 +131,15 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
         ImageView Thumb;
         TextView ImgName;
         FrameLayout fileFrame;
+        ProgressBar progressBar;
 
         public myViewHolder(View itemView) {
             super(itemView);
             ImgName = itemView.findViewById(R.id.imgName);
             Thumb = itemView.findViewById(R.id.ad_thumb);
             fileFrame = itemView.findViewById(R.id.file_frame);
+            progressBar = itemView.findViewById(R.id.progress);
+            progressBar.setVisibility(View.VISIBLE);
             fileFrame.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -108,7 +147,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
                     String videoName = data.get(position).getName();
                     Files file = GetFile(videoName);
 
-                    mCallback.onClick(file.getLocal_url());
+                    mCallback.onClick(file.getLocal_url(),file.getType());
 
                 }
             });
@@ -125,38 +164,6 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
         }
     }
 
-    private void AddFiles(final ImageUpload img, final Context context, final ImageView thumb) {
-        try {
-            final File localFile = File.createTempFile("file", img.getType());
-            riversRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    db.addFilesIf(new Files(img.getName(),img.getUrl(),localFile.getAbsolutePath(),img.getType(),"True"));
-                    Glide.with(context).load(localFile.getAbsolutePath()).into(thumb);
-                }
-            });
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void UpdateFiles(final ImageUpload img, final Context context, final ImageView thumb){
-        try {
-            final File localFile = File.createTempFile("file", img.getType());
-            riversRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    db.updateFiles(new Files(img.getName(),img.getUrl(),localFile.getAbsolutePath(),img.getType(),"True"));
-                    Glide.with(context).load(localFile.getAbsolutePath()).into(thumb);
-                }
-            });
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public Files GetFile(String Filename){
         db = new DatabaseHandler(context);
         if(CheckDB(Filename)){
@@ -168,7 +175,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
     }
 
     public interface OnItemClick {// Callback Interface
-        void onClick (String value);
+        void onClick(String value, String type);
     }
 
 }

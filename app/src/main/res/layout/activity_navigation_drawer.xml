@@ -14,6 +14,7 @@
         android:orientation="vertical"
         android:tag="@string/tag_menu"
         app:header="@layout/menu_header"
+        app:footer="@layout/menu_footer"
         app:background="@drawable/random"/>
 
     <LinearLayout

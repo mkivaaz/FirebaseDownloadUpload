@@ -11,25 +11,28 @@ public class Files {
     String local_url;
     String type;
     String downloaded;
+    String userEmail;
 
     public Files() {
     }
 
-    public Files(String id, String name, String url,String local_url, String type, String downloaded) {
+    public Files(String id, String name, String url,String local_url, String type, String downloaded, String userEmail) {
         this.id = id;
         this.name = name;
         this.url = url;
         this.local_url = local_url;
         this.type = type;
         this.downloaded = downloaded;
+        this.userEmail = userEmail;
     }
 
-    public Files(String name, String url,String local_url, String type, String downloaded) {
+    public Files(String name, String url,String local_url, String type, String downloaded, String userEmail) {
         this.name = name;
         this.url = url;
         this.local_url = local_url;
         this.type = type;
         this.downloaded = downloaded;
+        this.userEmail = userEmail;
     }
 
     public String getId() {
@@ -78,6 +81,14 @@ public class Files {
 
     public void setDownloaded(String downloaded) {
         this.downloaded = downloaded;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }
 
