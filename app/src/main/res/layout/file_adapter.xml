@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
 
     <android.support.v7.widget.CardView
         android:id="@+id/file_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
+        app:cardBackgroundColor="@color/colorPrimary"
         >
 
         <ImageView
@@ -18,14 +23,10 @@
             android:background="@android:color/black"
             />
 
-        <ProgressBar
-            android:id="@+id/progress"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"/>
+
 
         <TextView
+            android:layout_gravity="top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Name"
@@ -36,7 +37,40 @@
             android:paddingLeft="2sp"
             android:textColor="@android:color/white"/>
 
+
+        <LinearLayout
+            android:layout_gravity="bottom"
+            android:gravity="right"
+            android:background="@color/colorPrimaryTrans"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/delBtn"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_delete" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/progress"
+            android:gravity="center"
+            android:background="@color/colorPrimaryTrans"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.wang.avi.AVLoadingIndicatorView
+                android:id="@+id/progressBar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                app:indicatorName="BallScaleMultipleIndicator"
+                app:indicatorColor="@color/white"/>
+        </LinearLayout>
+
     </android.support.v7.widget.CardView>
+
 
 
 </LinearLayout>

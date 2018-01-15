@@ -86,5 +86,24 @@
                 android:text="Gallery"/>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/nav_BarcodeScanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/activity_horizontal_margin">
+            <ImageView
+                android:layout_gravity="center"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_menu_gallery"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:text="Barcode Scanner"/>
+        </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

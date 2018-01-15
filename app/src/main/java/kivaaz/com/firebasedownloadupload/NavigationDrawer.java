@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import kivaaz.com.firebasedownloadupload.Fragments.GalleryFragment;
+import kivaaz.com.firebasedownloadupload.Fragments.BarcodeScannerFragment;
 import kivaaz.com.firebasedownloadupload.Fragments.UploadFragment;
 import nl.psdcompany.duonavigationdrawer.views.DuoDrawerLayout;
 import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
@@ -31,7 +32,7 @@ public class NavigationDrawer extends AppCompatActivity {
         setContentView(R.layout.activity_navigation_drawer);
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Fragment current = new GalleryFragment();
@@ -49,6 +50,7 @@ public class NavigationDrawer extends AppCompatActivity {
         LinearLayout nav_upload = menuView.findViewById(R.id.nav_upload);
         LinearLayout nav_gallery = menuView.findViewById(R.id.nav_gallery);
         LinearLayout nav_logout = menuView.findViewById(R.id.logoutBtn);
+        LinearLayout nav_CodeScanner = menuView.findViewById(R.id.nav_BarcodeScanner);
         TextView userEmail = menuView.findViewById(R.id.useremail);
         userEmail.setText(storedEmail);
 
@@ -67,6 +69,14 @@ public class NavigationDrawer extends AppCompatActivity {
             public void onClick(View view) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.frame,  new GalleryFragment()).commit();
                 getSupportActionBar().setTitle("Gallery");
+                drawer.closeDrawer();
+            }
+        });
+        nav_CodeScanner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame,  new BarcodeScannerFragment()).commit();
+                getSupportActionBar().setTitle("Barcode Scanner");
                 drawer.closeDrawer();
             }
         });

@@ -8,6 +8,7 @@ public class ImageUpload {
     private String name;
     private String url;
     private String type;
+    private String key;
 
     public String getName() {
         return name;
@@ -33,10 +34,19 @@ public class ImageUpload {
         this.type = type;
     }
 
-    public ImageUpload(String Name, String Url, String Type) {
-        this.name = Name;
-        this.url = Url;
-        this.type = Type;
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public ImageUpload(String name, String url, String type, String key) {
+        this.name = name;
+        this.url = url;
+        this.type = type;
+        this.key = key;
     }
 
     public ImageUpload() {

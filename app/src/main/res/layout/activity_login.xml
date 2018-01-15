@@ -32,6 +32,7 @@
                 android:layout_width="0dp"
                 android:textColor="@color/white"
                 android:layout_weight="2"
+                android:inputType="textEmailAddress"
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
@@ -52,6 +53,7 @@
                 android:id="@+id/passET"
                 android:layout_width="0dp"
                 android:layout_weight="2"
+                android:inputType="textPassword"
                 android:textColor="@color/white"
                 android:layout_height="wrap_content"
                 />

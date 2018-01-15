@@ -1,22 +1,29 @@
 package kivaaz.com.firebasedownloadupload.Fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,7 +49,7 @@ import kivaaz.com.firebasedownloadupload.R;
 
 public class GalleryFragment extends Fragment {
 
-    FirebaseDatabase database;
+    DatabaseReference database;
     DatabaseReference myRef;
     List<ImageUpload> imgList;
 
@@ -56,6 +63,7 @@ public class GalleryFragment extends Fragment {
 
     DatabaseHandler db;
     public static final String FB_DATABASE_PATH = "images";
+    public static final String FB_STORAGE_PATH = "images/";
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
     private StorageReference mStorageRef;
@@ -71,7 +79,7 @@ public class GalleryFragment extends Fragment {
         currentUser = mAuth.getCurrentUser();
 
         final String userEmail ="/" + currentUser.getEmail().replace(".","");
-
+        database = FirebaseDatabase.getInstance().getReference(FB_DATABASE_PATH + userEmail);
         FileRecycle = view.findViewById(R.id.file_recycle);
         video = view.findViewById(R.id.video_load);
         img = view.findViewById(R.id.img_load);
@@ -85,7 +93,7 @@ public class GalleryFragment extends Fragment {
         video.setVisibility(View.GONE);
         img.setVisibility(View.GONE);
         final List<Files> filesList = db.getAllFiles();
-
+        Log.d("FILESIZE: ",filesList.size() + " files");
         if(filesList.size() == 0 || db.getCurrentFilesCount(currentUser.getEmail()) == 0){
             nofiles.setVisibility(View.VISIBLE);
         }
@@ -93,14 +101,9 @@ public class GalleryFragment extends Fragment {
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-
-
-
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     ImageUpload img = snapshot.getValue(ImageUpload.class);
-
                     imgList.add(img);
-
                 }
                 int fileNum = 0;
                 for (ImageUpload img : imgList) {
@@ -128,23 +131,47 @@ public class GalleryFragment extends Fragment {
 
                     // setting callback for Recyclerview
                     if(getContext() != null){
-                        adapter = new FileAdapter(imgList, getContext(), currentUser.getEmail(),new FileAdapter.OnItemClick() {
+                        adapter = new FileAdapter(imgList, getContext(), currentUser.getEmail(), new FileAdapter.OnItemClick() {
                             @Override
                             public void onClick(String path, String type) {
                                 playMedia(path, type, video, img);
+                            }
+                        }, new FileAdapter.DeleteOnItemClick() {
+                            @Override
+                            public void onClick(final ImageUpload img) {
+
+                                DialogInterface.OnClickListener dialogListener = new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        switch (i){
+                                            case  DialogInterface.BUTTON_POSITIVE:
+                                                deleteData(img);
+                                                break;
+
+                                            case DialogInterface.BUTTON_NEGATIVE:
+                                                break;
+                                        }
+                                    }
+                                };
+
+                                View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.delete_confirmation_dialog,null);
+                                TextView filename = dialogView.findViewById(R.id.imgNameTV);
+                                filename.setText(img.getName() + "." + img.getType());
+
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+                                dialog.setPositiveButton("Yes",dialogListener).setNegativeButton("No", dialogListener)
+                                        .setTitle("Are you sure you want to delete?")
+                                        .setView(dialogView).show();
+
                             }
                         });
                         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, OrientationHelper.VERTICAL);
                         FileRecycle.setAnimation(null);
                         FileRecycle.setAdapter(adapter);
                         FileRecycle.setLayoutManager(layoutManager);
-
                 }
 
-
             }
-
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -152,6 +179,48 @@ public class GalleryFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void deleteData(final ImageUpload img) {
+
+
+
+        final StorageReference ref = mStorageRef.child(FB_STORAGE_PATH + img.getName() + "." + img.getType());
+        ref.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Fragment currentFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.frame);
+                FragmentTransaction fragTransaction =   (getActivity()).getSupportFragmentManager().beginTransaction();
+                fragTransaction.detach(currentFragment);
+                fragTransaction.attach(currentFragment);
+                fragTransaction.commit();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getContext(),e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.d("DELETE ERROR: ", ref.getPath());
+
+            }
+        });
+
+        if(db.deleteFiles(GetFile(img.getName()))) {
+            Log.d("LOCALFILE: ", "DELETED");
+        }
+        myRef.child(img.getKey()).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getContext(),e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
     }
 
     private void playMedia(String path, String type, VideoView video, ImageView img) {

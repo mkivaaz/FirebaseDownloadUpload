@@ -200,11 +200,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Deleting single files
-    public void deleteFiles(Files files) {
+    public boolean deleteFiles(Files files) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_FILES, KEY_NAME + " = ?",
-                new String[] { String.valueOf(files.getId()) });
+        int rows = db.delete(TABLE_FILES, KEY_NAME + " = ?",
+                new String[] { String.valueOf(files.getName()) });
         db.close();
+        return rows > 0;
     }
 
 }

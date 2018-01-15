@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -25,7 +25,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,12 +50,14 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
     StorageReference riversRef;
     DatabaseHandler db;
     private OnItemClick mCallback;
+    private DeleteOnItemClick dCallback;
     private FirebaseAuth mAuth;
 
-    public FileAdapter(List<ImageUpload> data, Context context,String userEmail, OnItemClick listener) {
+    public FileAdapter(List<ImageUpload> data, Context context,String userEmail, OnItemClick listener, DeleteOnItemClick dCallback) {
         this.data = data;
         this.context = context;
         this.mCallback = listener;
+        this.dCallback = dCallback;
         this.userEmail = userEmail;
         inflater = LayoutInflater.from(context);
     }
@@ -93,7 +97,12 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
             try {
                 riversRef = mStorageRef.child(img.getUrl());
                 final File localFile = File.createTempFile("file", img.getType());
-                riversRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                riversRef.getFile(localFile).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                         Glide.with(context).load(localFile.getAbsolutePath()).listener(new RequestListener<Drawable>() {
@@ -105,7 +114,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
 
                             @Override
                             public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                holder.progressBar.setVisibility(View.GONE);
+                               holder.progressBar.setVisibility(View.GONE);
                                 return false;
                             }
                         }).into(holder.Thumb);
@@ -131,7 +140,9 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
         ImageView Thumb;
         TextView ImgName;
         FrameLayout fileFrame;
-        ProgressBar progressBar;
+        LinearLayout progressBar;
+        ImageView deletebtn;
+        AVLoadingIndicatorView progress;
 
         public myViewHolder(View itemView) {
             super(itemView);
@@ -139,7 +150,17 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
             Thumb = itemView.findViewById(R.id.ad_thumb);
             fileFrame = itemView.findViewById(R.id.file_frame);
             progressBar = itemView.findViewById(R.id.progress);
+            progress = itemView.findViewById(R.id.progressBar);
+            deletebtn = itemView.findViewById(R.id.delBtn);
             progressBar.setVisibility(View.VISIBLE);
+
+            deletebtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dCallback.onClick(data.get(getLayoutPosition()));
+                }
+            });
+
             fileFrame.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -176,6 +197,9 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
 
     public interface OnItemClick {// Callback Interface
         void onClick(String value, String type);
+    }
+    public interface DeleteOnItemClick {// Callback Interface
+        void onClick(ImageUpload img);
     }
 
 }

@@ -84,21 +84,23 @@ public class UploadFragment extends Fragment {
             public void onClick(View view) {
                 final ProgressDialog progressDialog = new ProgressDialog(getActivity());
                 progressDialog.setTitle("Uploading File...");
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 progressDialog.show();
+                final String fileName = String.valueOf(System.currentTimeMillis());
 
                 if (ImgURI != null){
-                    StorageReference ref = mStorageRef.child(FB_STORAGE_PATH +  System.currentTimeMillis() + "." + getImageExt(ImgURI));
+                    StorageReference ref = mStorageRef.child(FB_STORAGE_PATH +  fileName + "." + getImageExt(ImgURI));
                     ref.putFile(ImgURI).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
-                            progressDialog.setMessage("Uploaded "+(int)progress+"%");
+                            progressDialog.setProgress((int) progress);
                         }
                     }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            ImageUpload imgUpload = new ImageUpload(String.valueOf(System.currentTimeMillis()),taskSnapshot.getStorage().getPath(),getImageExt(ImgURI));
                             String uploadId = mDatabaseR.push().getKey();
+                            ImageUpload imgUpload = new ImageUpload(fileName,taskSnapshot.getStorage().getPath(),getImageExt(ImgURI),uploadId);
                             mDatabaseR.child(uploadId).setValue(imgUpload);
                             progressDialog.dismiss();
                             Toast.makeText(getContext(),"Upload Complete", Toast.LENGTH_SHORT).show();
