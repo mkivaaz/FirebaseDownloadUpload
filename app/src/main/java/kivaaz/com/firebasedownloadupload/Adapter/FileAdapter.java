@@ -78,7 +78,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.myViewHolder>{
         StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
         if(file != null ){
             holder.ImgName.setText(file.getName() + "." + file.getType());
-            Glide.with(context).load(file.getLocal_url()).listener(new RequestListener<Drawable>() {
+             Glide.with(context).load(file.getLocal_url()).listener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     holder.progressBar.setVisibility(View.GONE);

@@ -19,4 +19,10 @@
         android:layout_gravity="center_horizontal"
         android:text="QR Data Goes Here" />
 
+    <Button
+        android:id="@+id/generateQRBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Generate QR Code"/>
+
 </LinearLayout>
